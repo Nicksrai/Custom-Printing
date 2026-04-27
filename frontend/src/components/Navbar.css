@@ -1,0 +1,158 @@
+.navbar {
+    background-color: #ffffff;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+}
+
+.navbar-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 80px;
+}
+
+/* Logo */
+.navbar-logo a {
+    font-size: 36px;
+    color: #111;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* Center Menu */
+.navbar-menu {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar-menu a {
+    font-size: 14px;
+    font-weight: 500;
+    color: #111;
+    text-transform: uppercase;
+    text-decoration: none;
+    position: relative;
+    padding: 5px 0;
+    transition: all 0.3s;
+}
+
+.navbar-menu a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--primary);
+    transition: width 0.3s;
+}
+
+.navbar-menu a.active::after,
+.navbar-menu a:hover::after {
+    width: 100%;
+}
+
+/* Right Section */
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #111;
+}
+
+.role-tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    background: #f3f4f6;
+    color: #666;
+    text-decoration: none;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.role-tag.admin {
+    background: #fee2e2;
+    color: var(--primary);
+}
+
+.login-reg-link {
+    font-size: 13px;
+    color: #666;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.login-reg-link:hover { color: var(--primary); }
+
+.logout-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+}
+
+.logout-btn:hover { color: var(--primary); }
+
+/* Icons */
+.navbar-icons {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.icon-btn {
+    position: relative;
+    color: #111;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+}
+
+.icon-btn:hover { color: var(--primary); }
+
+.icon-btn .badge {
+    position: absolute;
+    top: -8px;
+    right: -10px;
+    background-color: #111;
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+}
+
+@media (max-width: 900px) {
+    .navbar-menu { display: none; }
+}

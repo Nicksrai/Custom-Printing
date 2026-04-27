@@ -1,0 +1,411 @@
+.cart-container {
+    max-width: 1280px;
+    margin: 2rem auto;
+    padding: 2rem;
+    min-height: calc(100vh - 150px);
+}
+
+.cart-container h1 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+}
+
+.loading-cart {
+    text-align: center;
+    padding: 4rem;
+    font-size: 1.25rem;
+    color: #6b7280;
+}
+
+.empty-cart {
+    text-align: center;
+    padding: 4rem;
+}
+
+.empty-cart p {
+    font-size: 1.25rem;
+    color: #6b7280;
+    margin-bottom: 20px;
+}
+
+.cart-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+}
+
+@media(min-width: 1024px) {
+    .cart-layout {
+        flex-direction: row;
+    }
+}
+
+.cart-items {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.cart-item {
+    display: flex;
+    align-items: center;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    border: 1px solid #e5e7eb;
+}
+
+.item-img-placeholder {
+    width: 100px;
+    height: 100px;
+    background: #f3f4f6;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: #9ca3af;
+    font-weight: 800;
+    margin-right: 1.5rem;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.item-img-placeholder img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.item-details { flex: 1; }
+.item-details h3 { margin: 0 0 0.5rem 0; }
+.item-details p { margin: 0.25rem 0; color: #4b5563; font-size: 0.875rem; }
+
+.item-price {
+    font-weight: 700;
+    font-size: 1.125rem !important;
+    color: var(--primary) !important;
+    margin-top: 0.5rem !important;
+}
+
+.remove-btn {
+    background: none;
+    border: none;
+    color: #dc2626;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+.remove-btn:hover { text-decoration: underline; }
+
+.order-summary {
+    flex: 1;
+    background: #f9fafb;
+    padding: 2rem;
+    border-radius: 1rem;
+    border: 1px solid #e5e7eb;
+    height: fit-content;
+}
+
+.order-summary h2 { margin-top: 0; margin-bottom: 1.5rem; }
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    color: #4b5563;
+}
+
+.summary-row.total {
+    border-top: 1px solid #d1d5db;
+    padding-top: 1rem;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #111827;
+}
+
+.shipping-form { margin-top: 2rem; }
+.shipping-form label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+.shipping-form textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    outline: none;
+    resize: vertical;
+    font-family: inherit;
+}
+.shipping-form textarea:focus { border-color: var(--primary); }
+
+.checkout-btn {
+    width: 100%;
+    background-color: var(--primary, #ca1515);
+    color: white;
+    padding: 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    font-size: 1.125rem;
+    cursor: pointer;
+    margin-top: 2rem;
+    transition: background-color 0.2s;
+}
+
+.checkout-btn:hover { opacity: 0.9; }
+
+/* Payment Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 2000;
+    backdrop-filter: blur(4px);
+}
+
+.payment-modal {
+    background: white;
+    padding: 35px;
+    border-radius: 16px;
+    width: 500px;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+}
+
+.payment-modal h3 {
+    margin: 0 0 25px 0;
+    font-size: 1.5rem;
+}
+
+.payment-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.payment-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.payment-option:hover { border-color: #6366f1; }
+
+.payment-option.selected {
+    border-color: #6366f1;
+    background: #eef2ff;
+}
+
+.payment-option input[type="radio"] { accent-color: #6366f1; }
+.payment-label { font-weight: 500; }
+
+.order-review {
+    background: #f9fafb;
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+}
+
+.order-review h4 { margin: 0 0 8px 0; }
+.order-review p { margin: 4px 0; color: #4b5563; font-size: 14px; }
+.address-preview { font-style: italic; }
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn-secondary {
+    background: #e4e6ef;
+    color: #3f4254;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.btn-primary {
+    background: #6366f1;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.btn-primary:hover { background: #4f46e5; }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Receipt Styles */
+.receipt-wrapper {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.receipt-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.receipt-header {
+    text-align: center;
+    border-bottom: 2px solid #111;
+    padding-bottom: 20px;
+    margin-bottom: 25px;
+}
+
+.receipt-header h1 {
+    font-size: 36px;
+    margin: 0 0 5px 0;
+}
+
+.receipt-header p {
+    color: #666;
+    margin: 0;
+    font-size: 14px;
+}
+
+.receipt-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding: 20px;
+    background: #f9fafb;
+    border-radius: 10px;
+}
+
+.receipt-meta-grid strong {
+    font-size: 11px;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.receipt-meta-grid p {
+    margin: 4px 0 0 0;
+    font-weight: 600;
+    color: #111;
+    font-size: 14px;
+}
+
+.receipt-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.receipt-table th, .receipt-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.receipt-table th {
+    font-weight: 600;
+    color: #374151;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.custom-note {
+    font-size: 12px;
+    color: #6b7280;
+    font-style: italic;
+}
+
+.receipt-totals {
+    margin-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 15px;
+}
+
+.totals-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #4b5563;
+}
+
+.total-final {
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    color: #111 !important;
+    border-top: 2px solid #111;
+    padding-top: 12px;
+    margin-top: 8px;
+}
+
+.receipt-address {
+    margin-top: 25px;
+    padding: 15px 20px;
+    background: #f9fafb;
+    border-radius: 8px;
+}
+
+.receipt-address strong { font-size: 12px; color: #6b7280; text-transform: uppercase; }
+.receipt-address p { margin: 5px 0 0 0; color: #111; }
+
+.receipt-footer {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 13px;
+    color: #9ca3af;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 20px;
+}
+
+.receipt-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.btn-print {
+    background: #111;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.btn-continue {
+    background: var(--primary, #ca1515);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.btn-print:hover { opacity: 0.85; }
+.btn-continue:hover { opacity: 0.85; }

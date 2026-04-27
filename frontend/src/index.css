@@ -1,0 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Cookie&family=Montserrat:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --primary: #ca1515; /* Red underline color */
+  --text-dark: #111111;
+  --text-gray: #666666;
+  --bg-color: #ffffff;
+  
+  --bg-women: #f4edeb;
+  --bg-men: #cae5e8;
+  --bg-kid: #e3e0ec;
+  --bg-cosmetics: #fddee9;
+  --bg-accessories: #e3f2fd;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-color);
+  color: var(--text-dark);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul {
+  list-style: none;
+}
+
+/* Custom Utilities */
+.cursive-font {
+  font-family: 'Cookie', cursive;
+}
+
+.shop-now-btn {
+  font-size: 14px;
+  color: var(--text-dark);
+  font-weight: 600;
+  text-transform: uppercase;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 5px;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+
+.shop-now-btn::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--primary);
+  transition: width 0.3s;
+}
+
+.shop-now-btn:hover::after {
+  width: 50%;
+}
