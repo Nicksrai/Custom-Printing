@@ -88,15 +88,16 @@ const Home = () => {
         : products.filter(p => categories.find(c => c.id === p.category_id)?.name === activeFilter);
 
     // Hero category config with fallback colors & default images
-    const heroBg = ['#f4edeb', '#cae5e8', '#e3e0ec', '#fddee9', '#e3f2fd'];
+    const heroBg = ['#f4edeb', '#cae5e8', '#e3e0ec', '#fddee9', '#e3f2fd', '#fff3e0'];
     const defaultHeroImages = [
-        'https://images.unsplash.com/photo-1618244972963-dbee1a7edc95?w=600&q=80',
-        'https://images.unsplash.com/photo-1617137968427-85924c800a22?w=500&q=80',
-        'https://images.unsplash.com/photo-1519689680058-324335c77eba?w=500&q=80',
-        'https://images.unsplash.com/photo-1596462502278-27bf85033e5a?w=500&q=80',
-        'https://images.unsplash.com/photo-1509319117193-57bab727e09d?w=500&q=80'
+        '/uploads/kids_zone.jpg',
+        '/uploads/wall_decorative.jpg',
+        '/uploads/home_decorative.jpg',
+        '/uploads/fashion_accessories.jpg',
+        '/uploads/photo_album.jpg',
+        '/uploads/desk_decorative.jpg'
     ];
-    const defaultNames = ["Women's fashion", "Men's fashion", "Kid's fashion", "Cosmetics", "Accessories"];
+    const defaultNames = ["Kids Zone", "Wall Decorative", "Home Decorative", "Fashion Accessories", "Photo Album & Print", "Desk Decorative"];
     const defaultCounts = ['', '358 items', '273 items', '159 items', '792 items'];
 
     return (
@@ -107,7 +108,7 @@ const Home = () => {
                 {/* Large Left Panel */}
                 <div className="hero-left" style={{ backgroundColor: heroBg[0] }}>
                     <div className="hero-left-img">
-                        <img src={categories[0] ? getImageUrl(categories[0].image_url) || defaultHeroImages[0] : defaultHeroImages[0]} alt="Main Category" />
+                        <img src={categories[0] ? getImageUrl(categories[0].image_url) : getImageUrl(defaultHeroImages[0])} alt={categories[0]?.name || defaultNames[0]} />
                     </div>
                     <div className="hero-left-text">
                         <h1 className="cursive-font">{categories[0]?.name || defaultNames[0]}</h1>
@@ -116,19 +117,19 @@ const Home = () => {
                     </div>
                 </div>
 
-                {/* Right 2x2 Grid */}
+                {/* Right 2x2 Grid -> Expanded */}
                 <div className="hero-right-grid">
-                    {[1, 2, 3, 4].map((idx) => {
+                    {[1, 2, 3, 4, 5].map((idx) => {
                         const cat = categories[idx];
                         return (
                             <div key={idx} className="hero-small-card" style={{ backgroundColor: heroBg[idx] }}>
                                 <div className="hero-small-text">
                                     <h3>{cat?.name || defaultNames[idx]}</h3>
-                                    <p className="item-count">{cat ? 'View Collection' : defaultCounts[idx]}</p>
+                                    <p className="item-count">{cat ? 'View Collection' : 'Browse'}</p>
                                     <Link to={cat ? `/products?cat=${cat.id}` : '/products'} className="shop-now-btn">SHOP NOW</Link>
                                 </div>
                                 <div className="hero-small-img">
-                                    <img src={cat ? getImageUrl(cat.image_url) || defaultHeroImages[idx] : defaultHeroImages[idx]} alt={cat?.name || defaultNames[idx]} />
+                                    <img src={cat ? getImageUrl(cat.image_url) : getImageUrl(defaultHeroImages[idx])} alt={cat?.name || defaultNames[idx]} />
                                 </div>
                             </div>
                         );
@@ -165,7 +166,7 @@ const Home = () => {
                                 <div className="product-info">
                                     <h6><Link to={`/product/${prod.id}`}>{prod.name}</Link></h6>
                                     {renderStars()}
-                                    <div className="product-price">$ {prod.base_price.toFixed(2)}</div>
+                                    <div className="product-price">₹ {prod.base_price.toFixed(2)}</div>
                                 </div>
                             </div>
                         ))}
@@ -205,7 +206,7 @@ const Home = () => {
                                         <div className="list-item-text">
                                             <h6><Link to={`/product/${prod.id}`}>{prod.name}</Link></h6>
                                             {renderStars()}
-                                            <div className="list-price">$ {prod.base_price.toFixed(2)}</div>
+                                            <div className="list-price">₹ {prod.base_price.toFixed(2)}</div>
                                         </div>
                                     </div>
                                 ))}
@@ -221,7 +222,7 @@ const Home = () => {
                     <div className="features-flex">
                         <div className="feature-item">
                             <Activity className="icon-red" size={32} />
-                            <div className="f-text"><h6>Free Shipping</h6><p>For all order over $99</p></div>
+                            <div className="f-text"><h6>Free Shipping</h6><p>For all order over ₹99</p></div>
                         </div>
                         <div className="feature-item">
                             <ShieldCheck className="icon-red" size={32} />

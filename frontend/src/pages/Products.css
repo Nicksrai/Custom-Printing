@@ -22,3 +22,24 @@
     color: #6b7280;
     font-size: 1.1rem;
 }
+
+.search-bar-container {
+    margin-top: 15px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.product-search-input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #e5e7eb;
+    border-radius: 25px;
+    outline: none;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.product-search-input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}

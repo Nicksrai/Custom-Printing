@@ -54,7 +54,7 @@ const Navbar = () => {
             <div className="navbar-container">
                 {/* Logo */}
                 <div className="navbar-logo">
-                    <Link to="/" className="cursive-font">Custom Wears</Link>
+                    <Link to="/" className="cursive-font">PrintHub Studio</Link>
                 </div>
                 
                 {/* Menu */}
@@ -86,7 +86,7 @@ const Navbar = () => {
                     </div>
                     
                     <div className="navbar-icons">
-                        <Link to="/products" className="icon-btn search-trigger">
+                        <Link to="/wishlist" className="icon-btn search-trigger" title="Wishlist">
                             <Heart size={20} strokeWidth={1.5} />
                             {wishlistCount > 0 && <span className="badge">{wishlistCount}</span>}
                         </Link>

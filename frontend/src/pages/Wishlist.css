@@ -1,0 +1,146 @@
+.wishlist-page {
+    padding: 60px 0;
+    min-height: 80vh;
+}
+
+.wishlist-header {
+    margin-bottom: 40px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 20px;
+}
+
+.wishlist-header h1 {
+    font-size: 2.2rem;
+    color: #111;
+}
+
+.wishlist-header p {
+    color: #666;
+}
+
+.empty-wishlist {
+    text-align: center;
+    padding: 80px 20px;
+    background: #f9f9f9;
+    border-radius: 12px;
+}
+
+.empty-wishlist h3 {
+    margin: 20px 0 10px;
+}
+
+.shop-btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 12px 30px;
+    background: #111;
+    color: white;
+    text-decoration: none;
+    border-radius: 30px;
+}
+
+.wishlist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.wishlist-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
+}
+
+.wishlist-card:hover {
+    transform: translateY(-5px);
+}
+
+.wishlist-img {
+    height: 300px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.remove-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    color: #ef4444;
+}
+
+.wishlist-info {
+    padding: 20px;
+}
+
+.wishlist-info h3 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+}
+
+.wishlist-info .price {
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 20px;
+}
+
+.wishlist-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.view-btn {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.cart-btn {
+    flex: 1.5;
+    padding: 10px;
+    background: #111;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.wishlist-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.cust-badge {
+    background: #eef2ff;
+    color: #4f46e5;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}

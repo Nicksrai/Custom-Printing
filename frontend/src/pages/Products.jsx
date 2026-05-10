@@ -9,6 +9,7 @@ const Products = () => {
     const [categories, setCategories] = useState([]);
     const [searchParams] = useSearchParams();
     const [activeCategory, setActiveCategory] = useState('All');
+    const [searchQuery, setSearchQuery] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -57,9 +58,12 @@ const Products = () => {
         }
     };
 
-    const filteredProducts = activeCategory === 'All'
-        ? products
-        : products.filter(p => categories.find(c => c.id === p.category_id)?.name === activeCategory);
+    const filteredProducts = products.filter(p => {
+        const matchesCategory = activeCategory === 'All' || 
+            categories.find(c => c.id === p.category_id)?.name === activeCategory;
+        const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesCategory && matchesSearch;
+    });
 
     const renderStars = () => (
         <div className="product-rating">
@@ -84,6 +88,15 @@ const Products = () => {
                             </li>
                         ))}
                     </ul>
+                    <div className="search-bar-container">
+                        <input 
+                            type="text" 
+                            placeholder="Search products..." 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="product-search-input"
+                        />
+                    </div>
                 </div>
 
                 <div className="product-grid">

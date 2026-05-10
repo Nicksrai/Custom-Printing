@@ -5,7 +5,7 @@ from datetime import datetime
 from pydantic import BaseModel
 from typing import Optional
 from app.db.database import get_db
-from app.models.all_models import Order, User, Product, ContactMessage, OrderItem, Payment, Offer, CartItem
+from app.models.all_models import Order, User, Product, ContactMessage, OrderItem, Payment, Offer, CartItem, RoleEnum, OrderStatus
 from app.core.security import get_current_admin, get_current_user
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
@@ -19,14 +19,22 @@ class OfferCreate(BaseModel):
     banner_image_url: Optional[str] = None
     is_active: bool = True
 
+class CustomerRequirementCreate(BaseModel):
+    customer_name: str
+    product_category: str
+    color: Optional[str] = None
+    quantity: int = 1
+    notes: Optional[str] = None
+    custom_text: Optional[str] = None
+
 # ===== Dashboard =====
 @router.get("/dashboard")
 def get_dashboard_stats(db: Session = Depends(get_db), current_admin = Depends(get_current_admin)):
     total_sales = db.query(func.sum(Order.total_amount)).scalar() or 0.0
     total_orders = db.query(func.count(Order.id)).scalar()
-    total_users = db.query(func.count(User.id)).filter(User.role == 'user').scalar()
+    total_users = db.query(func.count(User.id)).filter(User.role == RoleEnum.user).scalar()
     total_products = db.query(func.count(Product.id)).scalar()
-    pending_orders = db.query(func.count(Order.id)).filter(Order.status == 'pending').scalar()
+    pending_orders = db.query(func.count(Order.id)).filter(Order.status == OrderStatus.new).scalar()
     recent_messages = db.query(ContactMessage).order_by(ContactMessage.created_at.desc()).limit(5).all()
 
     return {
@@ -135,6 +143,39 @@ def delete_offer(offer_id: int, db: Session = Depends(get_db), current_admin = D
     db.delete(offer)
     db.commit()
     return {"message": "Offer deleted"}
+
+# ===== Customer Requirements =====
+@router.get("/requirements")
+def get_all_requirements(db: Session = Depends(get_db), current_admin = Depends(get_current_admin)):
+    from app.models.all_models import CustomerRequirement
+    requirements = db.query(CustomerRequirement).order_by(CustomerRequirement.created_at.desc()).all()
+    return requirements
+
+@router.post("/requirements")
+def create_requirement(req: CustomerRequirementCreate, db: Session = Depends(get_db), current_admin = Depends(get_current_admin)):
+    from app.models.all_models import CustomerRequirement
+    db_req = CustomerRequirement(
+        customer_name=req.customer_name,
+        product_category=req.product_category,
+        color=req.color,
+        quantity=req.quantity,
+        notes=req.notes,
+        custom_text=req.custom_text
+    )
+    db.add(db_req)
+    db.commit()
+    db.refresh(db_req)
+    return db_req
+
+@router.put("/requirements/{req_id}/status")
+def update_requirement_status(req_id: int, status: str, db: Session = Depends(get_db), current_admin = Depends(get_current_admin)):
+    from app.models.all_models import CustomerRequirement
+    db_req = db.query(CustomerRequirement).filter(CustomerRequirement.id == req_id).first()
+    if not db_req:
+        raise HTTPException(status_code=404, detail="Requirement not found")
+    db_req.status = status
+    db.commit()
+    return {"message": f"Requirement #{req_id} status updated to {status}"}
 
 # ===== Public: Active Offer (no auth needed) =====
 # This is placed here but exposed via a separate public router below

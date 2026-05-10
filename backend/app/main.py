@@ -7,6 +7,45 @@ from app.models import all_models
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
+# Auto-migrate wishlist table
+def migrate_db():
+    from sqlalchemy import text
+    from app.db.database import SessionLocal
+    db = SessionLocal()
+    try:
+        # PostgreSQL specific syntax to add column if not exists
+        db.execute(text("ALTER TABLE wishlist ADD COLUMN IF NOT EXISTS customization_details TEXT"))
+        db.commit()
+    except Exception as e:
+        print(f"Migration warning: {e}")
+    finally:
+        db.close()
+
+migrate_db()
+
+# Auto-create default admin
+def init_admin():
+    from app.db.database import SessionLocal
+    from app.models.all_models import User, RoleEnum
+    from app.core.security import get_password_hash
+    db = SessionLocal()
+    try:
+        admin = db.query(User).filter(User.role == RoleEnum.admin).first()
+        if not admin:
+            hashed_pw = get_password_hash("admin123")
+            new_admin = User(
+                name="Admin",
+                email="admin@printhub.com",
+                hashed_password=hashed_pw,
+                role=RoleEnum.admin
+            )
+            db.add(new_admin)
+            db.commit()
+    finally:
+        db.close()
+
+init_admin()
+
 app = FastAPI(
     title="Custom Printing API",
     description="Backend API for Custom Printing & Personalization Website",

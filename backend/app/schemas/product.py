@@ -45,3 +45,12 @@ class ProductResponse(ProductBase):
     customization_options: List[ProductCustomizationResponse] = []
     class Config:
         from_attributes = True
+
+class WishlistResponse(BaseModel):
+    id: int
+    product_id: int
+    customization_details: Optional[str] = None
+    product: ProductResponse
+    created_at: datetime
+    class Config:
+        from_attributes = True

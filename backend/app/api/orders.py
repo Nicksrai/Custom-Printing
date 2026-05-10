@@ -35,6 +35,23 @@ def add_to_cart(cart_item: CartItemCreate, db: Session = Depends(get_db), curren
     db.refresh(db_item)
     return db_item
 
+@router.put("/cart/{item_id}", response_model=CartItemResponse)
+def update_cart_item(item_id: int, cart_item: CartItemCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    db_item = db.query(CartItem).filter(CartItem.id == item_id, CartItem.user_id == current_user.id).first()
+    if not db_item:
+        raise HTTPException(status_code=404, detail="Item not found")
+        
+    db_item.quantity = cart_item.quantity
+    db_item.customization_details = cart_item.customization_details
+    
+    # Recalculate price
+    product = db.query(Product).filter(Product.id == db_item.product_id).first()
+    db_item.total_price = product.base_price * db_item.quantity
+    
+    db.commit()
+    db.refresh(db_item)
+    return db_item
+
 @router.delete("/cart/{item_id}")
 def remove_from_cart(item_id: int, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     item = db.query(CartItem).filter(CartItem.id == item_id, CartItem.user_id == current_user.id).first()

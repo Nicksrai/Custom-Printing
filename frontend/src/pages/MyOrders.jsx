@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import './MyOrders.css';
-import { Package, Truck, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Package, Truck, CheckCircle, XCircle, Clock, FileText } from 'lucide-react';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const MyOrders = () => {
     const { user } = useContext(AuthContext);
@@ -32,11 +34,12 @@ const MyOrders = () => {
 
     const getStatusIcon = (status) => {
         switch (status) {
-            case 'pending': return <Clock size={20} color="#f59e0b" />;
-            case 'processing': return <Package size={20} color="#3b82f6" />;
-            case 'shipped': return <Truck size={20} color="#8b5cf6" />;
-            case 'delivered': return <CheckCircle size={20} color="#10b981" />;
-            case 'cancelled': return <XCircle size={20} color="#ef4444" />;
+            case 'New': return <Clock size={20} color="#f59e0b" />;
+            case 'Designing': return <Package size={20} color="#3b82f6" />;
+            case 'Printing': return <Package size={20} color="#8b5cf6" />;
+            case 'Ready': return <Truck size={20} color="#8b5cf6" />;
+            case 'Delivered': return <CheckCircle size={20} color="#10b981" />;
+            case 'Cancelled': return <XCircle size={20} color="#ef4444" />;
             default: return <Clock size={20} color="#6b7280" />;
         }
     };
@@ -47,13 +50,74 @@ const MyOrders = () => {
         });
     };
 
+    const handleDownloadInvoice = (order) => {
+        const doc = new jsPDF();
+
+        // Header
+        doc.setFontSize(22);
+        doc.setTextColor(33, 37, 41);
+        doc.text("INVOICE", 105, 20, { align: "center" });
+
+        doc.setFontSize(12);
+        doc.text("PrintHub Studio", 20, 30);
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text("123 Printing Street, Creative City", 20, 35);
+        doc.text("Contact: +91 9876543210", 20, 40);
+
+        // Order Info
+        doc.setTextColor(0);
+        doc.text(`Invoice Date: ₹{new Date().toLocaleDateString()}`, 140, 35);
+        doc.text(`Order ID: #₹{order.id}`, 140, 40);
+
+        // Customer Info
+        doc.line(20, 45, 190, 45);
+        doc.setFontSize(11);
+        doc.text("Bill To:", 20, 55);
+        doc.setFontSize(10);
+        doc.text(user.name || "Customer", 20, 60);
+        doc.text(order.shipping_address || "N/A", 20, 65);
+
+        // Table
+        const tableColumn = ["Product", "Quantity", "Price", "Total"];
+        const tableRows = [];
+
+        order.items.forEach(item => {
+            const itemData = [
+                item.product_name,
+                item.quantity,
+                `₹₹{item.price.toFixed(2)}`,
+                `₹₹{(item.price * item.quantity).toFixed(2)}`
+            ];
+            tableRows.push(itemData);
+        });
+
+        doc.autoTable({
+            head: [tableColumn],
+            body: tableRows,
+            startY: 75,
+            theme: 'grid',
+            headStyles: { fillStyle: [33, 37, 41] }
+        });
+
+        const finalY = doc.lastAutoTable.finalY + 10;
+        doc.setFontSize(12);
+        doc.text(`Grand Total: ₹₹{order.total_amount.toFixed(2)}`, 140, finalY);
+
+        doc.setFontSize(10);
+        doc.setTextColor(150);
+        doc.text("Thank you for shopping with PrintHub Studio!", 105, finalY + 20, { align: "center" });
+
+        doc.save(`Invoice_Order_₹{order.id}.pdf`);
+    };
+
     if (loading) return <div className="loading-screen">Loading your orders...</div>;
 
     return (
         <div className="my-orders-container">
             <div className="container">
                 <h1>My Order History</h1>
-                
+
                 {orders.length === 0 ? (
                     <div className="empty-orders">
                         <Package size={64} color="#d1d5db" />
@@ -72,7 +136,7 @@ const MyOrders = () => {
                                         </div>
                                         <div className="meta-item">
                                             <span className="label">TOTAL</span>
-                                            <span className="value">${order.total_amount.toFixed(2)}</span>
+                                            <span className="value">₹{order.total_amount.toFixed(2)}</span>
                                         </div>
                                         <div className="meta-item">
                                             <span className="label">SHIP TO</span>
@@ -81,9 +145,12 @@ const MyOrders = () => {
                                     </div>
                                     <div className="order-id">
                                         <span className="label">ORDER # {order.id}</span>
+                                        <button className="invoice-btn" onClick={() => handleDownloadInvoice(order)}>
+                                            <FileText size={16} /> Invoice
+                                        </button>
                                     </div>
                                 </div>
-                                
+
                                 <div className="order-body">
                                     <div className="order-status-bar">
                                         <div className="status-indicator">
@@ -101,7 +168,7 @@ const MyOrders = () => {
                                                 <div className="item-info">
                                                     <h6>{item.product_name}</h6>
                                                     <p>Quantity: {item.quantity}</p>
-                                                    <p className="item-price">${item.price.toFixed(2)}</p>
+                                                    <p className="item-price">₹{item.price.toFixed(2)}</p>
                                                 </div>
                                             </div>
                                         ))}

@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import './ProductDetails.css';
+import ProductPreview from '../components/ProductPreview';
+import { Heart } from 'lucide-react';
 
 const ProductDetails = () => {
     const { id } = useParams();
@@ -10,10 +12,10 @@ const ProductDetails = () => {
     const { user } = useContext(AuthContext);
     const [product, setProduct] = useState(null);
     const [quantity, setQuantity] = useState(1);
-    const [customization, setCustomization] = useState({ text: '', details: {} });
+    const [customization, setCustomization] = useState({ text: '', printSide: 'Front', color: '#ffffff' });
     const [uploadedFileUrl, setUploadedFileUrl] = useState(null);
     const [uploading, setUploading] = useState(false);
-    
+
     useEffect(() => {
         const fetchProduct = async () => {
             try {
@@ -29,7 +31,7 @@ const ProductDetails = () => {
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        
+
         const formData = new FormData();
         formData.append('file', file);
         setUploading(true);
@@ -71,6 +73,17 @@ const ProductDetails = () => {
         }
     };
 
+    const handleWishlist = async () => {
+        if (!user) { navigate('/login'); return; }
+        try {
+            await api.post(`/products/wishlist/${id}?customization=${encodeURIComponent(JSON.stringify(customization))}`);
+            window.dispatchEvent(new Event('wishlistUpdated'));
+            alert('Added to Wishlist with customization!');
+        } catch (err) {
+            alert('Failed to add to wishlist');
+        }
+    };
+
     // Calculate dynamic price
     let currentPrice = product?.base_price || 0;
     // We would loop through customization.details to add price_modifiers here
@@ -80,57 +93,60 @@ const ProductDetails = () => {
     return (
         <div className="product-details-container">
             <div className="product-grid">
-                
+
                 {/* Visual Preview Area */}
                 <div className="product-visual">
-                    <div className="product-image-large">
-                        {product.image_url ? (
-                            <img src={`http://localhost:8000${product.image_url}`} alt={product.name} />
-                        ) : (
-                            <div className="placeholder">{product.name.charAt(0)}</div>
-                        )}
-                        
-                        {/* Live Design overlay mockup */}
-                        {uploadedFileUrl && (
-                            <div className="design-overlay">
-                                <img src={`http://localhost:8000${uploadedFileUrl}`} alt="Custom Design" />
-                            </div>
-                        )}
-                        {customization.text && (
-                            <div className="text-overlay">
-                                {customization.text}
-                            </div>
-                        )}
-                    </div>
+                    <ProductPreview
+                        type={product.category?.name || product.name}
+                        color={customization.color}
+                        text={customization.text}
+                        image={uploadedFileUrl ? `http://localhost:8000${uploadedFileUrl}` : null}
+                    />
                 </div>
 
                 {/* Customization & Info Panel */}
                 <div className="product-info-panel">
                     <h1>{product.name}</h1>
-                    <p className="price">${(currentPrice * quantity).toFixed(2)}</p>
+                    <p className="price">₹{(currentPrice * quantity).toFixed(2)}</p>
                     <p className="desc">{product.description}</p>
                     <p className="features">{product.features}</p>
 
                     {product.is_customizable && (
                         <div className="customization-engine">
                             <h3>Personalize It</h3>
-                            
+
                             <div className="form-group">
                                 <label>Custom Text</label>
-                                <input 
-                                    type="text" 
-                                    placeholder="Enter text to print" 
+                                <input
+                                    type="text"
+                                    placeholder="Enter text to print"
                                     value={customization.text}
-                                    onChange={(e) => setCustomization({...customization, text: e.target.value})}
+                                    onChange={(e) => setCustomization({ ...customization, text: e.target.value })}
                                 />
+                            </div>
+
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label>Base Color</label>
+                                    <input type="color" value={customization.color} onChange={e => setCustomization({ ...customization, color: e.target.value })} />
+                                </div>
+                                <div className="form-group">
+                                    <label>Print Side</label>
+                                    <select value={customization.printSide} onChange={e => setCustomization({ ...customization, printSide: e.target.value })}>
+                                        <option>Front</option>
+                                        <option>Back</option>
+                                        <option>Left Sleeve</option>
+                                        <option>Right Sleeve</option>
+                                    </select>
+                                </div>
                             </div>
 
                             <div className="form-group">
                                 <label>Upload Custom Design (Image)</label>
-                                <input 
-                                    type="file" 
-                                    accept="image/*" 
-                                    onChange={handleFileUpload} 
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleFileUpload}
                                 />
                                 {uploading && <span className="uploading-text">Uploading...</span>}
                             </div>
@@ -145,6 +161,9 @@ const ProductDetails = () => {
                         </div>
                         <button className="add-to-cart-btn" onClick={handleAddToCart}>
                             Add to Cart
+                        </button>
+                        <button className="wishlist-action-btn" onClick={handleWishlist} title="Add to Wishlist">
+                            <Heart size={20} />
                         </button>
                     </div>
                 </div>

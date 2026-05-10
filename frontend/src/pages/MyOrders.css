@@ -161,3 +161,28 @@
     .order-meta { gap: 20px; flex-wrap: wrap; }
     .order-status-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
 }
+
+.invoice-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 5px;
+}
+
+.invoice-btn:hover {
+    background: #e5e7eb;
+    border-color: #d1d5db;
+}
+
+.order-id {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}

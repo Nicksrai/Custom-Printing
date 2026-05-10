@@ -14,11 +14,12 @@ class PaymentStatus(str, enum.Enum):
     failed = "failed"
 
 class OrderStatus(str, enum.Enum):
-    pending = "pending"
-    processing = "processing"
-    shipped = "shipped"
-    delivered = "delivered"
-    cancelled = "cancelled"
+    new = "New"
+    designing = "Designing"
+    printing = "Printing"
+    ready = "Ready"
+    delivered = "Delivered"
+    cancelled = "Cancelled"
 
 class User(Base):
     __tablename__ = "users"
@@ -83,7 +84,7 @@ class Order(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     total_amount = Column(Float, nullable=False)
-    status = Column(Enum(OrderStatus), default=OrderStatus.pending)
+    status = Column(Enum(OrderStatus), default=OrderStatus.new)
     shipping_address = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -148,7 +149,20 @@ class Wishlist(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     product_id = Column(Integer, ForeignKey("products.id"))
+    customization_details = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     
     user = relationship("User")
     product = relationship("Product")
+
+class CustomerRequirement(Base):
+    __tablename__ = "customer_requirements"
+    id = Column(Integer, primary_key=True, index=True)
+    customer_name = Column(String(100), nullable=False)
+    product_category = Column(String(100), nullable=False)
+    color = Column(String(50), nullable=True)
+    quantity = Column(Integer, default=1)
+    notes = Column(Text, nullable=True)
+    custom_text = Column(String(200), nullable=True)
+    status = Column(Enum(OrderStatus), default=OrderStatus.new)
+    created_at = Column(DateTime, default=datetime.utcnow)

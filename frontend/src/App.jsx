@@ -12,6 +12,7 @@ import Admin from './pages/Admin';
 import Blog from './pages/Blog';
 import Contact from './pages/Contact';
 import MyOrders from './pages/MyOrders';
+import Wishlist from './pages/Wishlist';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route path="/blog" element={<Blog />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/my-orders" element={<MyOrders />} />
+          <Route path="/wishlist" element={<Wishlist />} />
         </Routes>
         <Footer />
       </Router>

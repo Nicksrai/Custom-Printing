@@ -2,6 +2,8 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
+import ProductPreview from '../components/ProductPreview';
+import { Edit3, Check, X } from 'lucide-react';
 import './Cart.css';
 
 const Cart = () => {
@@ -13,6 +15,8 @@ const Cart = () => {
     const [showReceipt, setShowReceipt] = useState(false);
     const [receiptData, setReceiptData] = useState(null);
     const [processing, setProcessing] = useState(false);
+    const [editingItem, setEditingItem] = useState(null);
+    const [editForm, setEditForm] = useState(null);
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
     const receiptRef = useRef();
@@ -42,6 +46,26 @@ const Cart = () => {
             fetchCart();
         } catch (err) {
             alert('Failed to remove item');
+        }
+    };
+
+    const startEditing = (item) => {
+        setEditingItem(item);
+        setEditForm(item.customization_details ? JSON.parse(item.customization_details) : {});
+    };
+
+    const saveCustomization = async () => {
+        try {
+            await api.put(`/orders/cart/${editingItem.id}`, {
+                product_id: editingItem.product_id,
+                quantity: editingItem.quantity,
+                customization_details: JSON.stringify(editForm)
+            });
+            setEditingItem(null);
+            fetchCart();
+            alert('Customization updated!');
+        } catch (err) {
+            alert('Failed to update customization');
         }
     };
 
@@ -178,16 +202,16 @@ const Cart = () => {
                                             {item.customization?.text && <span className="custom-note"> (Text: {item.customization.text})</span>}
                                         </td>
                                         <td>{item.qty}</td>
-                                        <td>${item.price.toFixed(2)}</td>
+                                        <td>₹{item.price.toFixed(2)}</td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
 
                         <div className="receipt-totals">
-                            <div className="totals-row"><span>Subtotal</span><span>${receiptData.subtotal.toFixed(2)}</span></div>
+                            <div className="totals-row"><span>Subtotal</span><span>₹{receiptData.subtotal.toFixed(2)}</span></div>
                             <div className="totals-row"><span>Shipping</span><span>Free</span></div>
-                            <div className="totals-row total-final"><span>Total</span><span>${receiptData.total.toFixed(2)}</span></div>
+                            <div className="totals-row total-final"><span>Total</span><span>₹{receiptData.total.toFixed(2)}</span></div>
                         </div>
 
                         <div className="receipt-address">
@@ -235,15 +259,29 @@ const Cart = () => {
                                         )}
                                     </div>
                                     <div className="item-details">
-                                        <h3>{item.product?.name || 'Product'}</h3>
-                                        <p>Qty: {item.quantity}</p>
-                                        {customInfo.text && <p>Custom Text: {customInfo.text}</p>}
-                                        {customInfo.uploadedDesign && <p>Design Uploaded ✅</p>}
-                                        <p className="item-price">${item.total_price.toFixed(2)}</p>
+                                        <div className="item-title-row">
+                                            <h3>{item.product?.name || 'Product'}</h3>
+                                            {item.customization_details && <span className="cust-badge-small">Customized</span>}
+                                        </div>
+                                        <p className="item-qty">Qty: {item.quantity}</p>
+                                        
+                                        <div className="item-custom-summary">
+                                            {customInfo.color && <span className="custom-tag">Color: {customInfo.color}</span>}
+                                            {customInfo.side && <span className="custom-tag">Side: {customInfo.side}</span>}
+                                            {customInfo.text && <p className="custom-text-prev">" {customInfo.text} "</p>}
+                                            {customInfo.image && <span className="custom-tag">Design: Custom Uploaded</span>}
+                                        </div>
+                                        
+                                        <p className="item-price">₹{item.total_price.toFixed(2)}</p>
                                     </div>
-                                    <button className="remove-btn" onClick={() => handleRemove(item.id)}>
-                                        Remove
-                                    </button>
+                                    <div className="item-actions-stack">
+                                        <button className="edit-cust-btn" onClick={() => startEditing(item)}>
+                                            <Edit3 size={16} /> Edit Design
+                                        </button>
+                                        <button className="remove-btn" onClick={() => handleRemove(item.id)}>
+                                            Remove
+                                        </button>
+                                    </div>
                                 </div>
                             );
                         })}
@@ -253,7 +291,7 @@ const Cart = () => {
                         <h2>Order Summary</h2>
                         <div className="summary-row">
                             <span>Subtotal</span>
-                            <span>${totalAmount.toFixed(2)}</span>
+                            <span>₹{totalAmount.toFixed(2)}</span>
                         </div>
                         <div className="summary-row">
                             <span>Shipping</span>
@@ -261,7 +299,7 @@ const Cart = () => {
                         </div>
                         <div className="summary-row total">
                             <span>Total</span>
-                            <span>${totalAmount.toFixed(2)}</span>
+                            <span>₹{totalAmount.toFixed(2)}</span>
                         </div>
                         
                         <div className="shipping-form">
@@ -277,6 +315,74 @@ const Cart = () => {
                         <button className="checkout-btn" onClick={handleInitiateCheckout}>
                             Proceed to Checkout
                         </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Customization Modal */}
+            {editingItem && (
+                <div className="modal-overlay">
+                    <div className="edit-modal large-modal">
+                        <div className="modal-header">
+                            <h3>Customize: {editingItem.product.name}</h3>
+                            <button className="close-x" onClick={() => setEditingItem(null)}><X /></button>
+                        </div>
+                        
+                        <div className="edit-modal-body">
+                            <div className="edit-controls">
+                                <div className="control-group">
+                                    <label>Pick Color</label>
+                                    <div className="color-options-row">
+                                        {['#ffffff', '#000000', '#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#6366f1'].map(c => (
+                                            <div 
+                                                key={c} 
+                                                className={`color-blob ${editForm.color === c ? 'active' : ''}`}
+                                                style={{ backgroundColor: c }}
+                                                onClick={() => setEditForm({...editForm, color: c})}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="control-group">
+                                    <label>Custom Text</label>
+                                    <input 
+                                        type="text" 
+                                        value={editForm.text || ''} 
+                                        onChange={(e) => setEditForm({...editForm, text: e.target.value})}
+                                        placeholder="Type something..."
+                                    />
+                                </div>
+
+                                <div className="control-group">
+                                    <label>Print Position</label>
+                                    <select 
+                                        value={editForm.side || 'Front'} 
+                                        onChange={(e) => setEditForm({...editForm, side: e.target.value})}
+                                    >
+                                        <option value="Front">Front Center</option>
+                                        <option value="Back">Full Back</option>
+                                        <option value="Sleeve">Sleeve</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="edit-preview-pane">
+                                <ProductPreview 
+                                    type={editingItem.product.name}
+                                    color={editForm.color}
+                                    text={editForm.text}
+                                    image={editForm.image}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="modal-actions">
+                            <button className="btn-secondary" onClick={() => setEditingItem(null)}>Cancel</button>
+                            <button className="btn-primary" onClick={saveCustomization}>
+                                <Check size={18} /> Update Design
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
@@ -310,7 +416,7 @@ const Cart = () => {
                         <div className="modal-actions">
                             <button className="btn-secondary" onClick={() => setShowPaymentModal(false)}>Cancel</button>
                             <button className="btn-primary" onClick={handleConfirmPayment} disabled={processing}>
-                                {processing ? 'Processing...' : `Pay $${totalAmount.toFixed(2)}`}
+                                {processing ? 'Processing...' : `Pay ₹${totalAmount.toFixed(2)}`}
                             </button>
                         </div>
                     </div>

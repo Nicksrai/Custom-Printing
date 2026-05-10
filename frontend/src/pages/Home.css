@@ -65,12 +65,12 @@
     margin-bottom: 25px;
 }
 
-/* Right 2x2 Grid */
+/* Right 2x2 Grid -> Expanded to more items */
 .hero-right-grid {
     width: 50%;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
+    gap: 15px;
 }
 
 .hero-small-card {

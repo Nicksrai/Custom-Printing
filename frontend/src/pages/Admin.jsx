@@ -2,8 +2,9 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
+import { BarChart, Users, Package, ShoppingBag, LayoutDashboard, ChevronDown, Eye, Tag, Trash2, ClipboardList, Search, Filter } from 'lucide-react';
+import ProductPreview from '../components/ProductPreview';
 import './Admin.css';
-import { BarChart, Users, Package, ShoppingBag, LayoutDashboard, ChevronDown, Eye, Tag, Trash2 } from 'lucide-react';
 
 const Admin = () => {
     const { user } = useContext(AuthContext);
@@ -18,12 +19,20 @@ const Admin = () => {
     const [orders, setOrders] = useState([]);
     const [customers, setCustomers] = useState([]);
     const [offers, setOffers] = useState([]);
+    const [requirements, setRequirements] = useState([]);
+
+    // Search/Filter states
+    const [searchQuery, setSearchQuery] = useState('');
+    const [catFilter, setCatFilter] = useState('');
 
     // Form states
     const [showAddProduct, setShowAddProduct] = useState(false);
     const [showAddCategory, setShowAddCategory] = useState(false);
     const [showAddOffer, setShowAddOffer] = useState(false);
     const [expandedOrder, setExpandedOrder] = useState(null);
+    const [reqForm, setReqForm] = useState({
+        customer_name: '', product_category: 'Mug', color: '#ffffff', quantity: 1, notes: '', custom_text: ''
+    });
     
     useEffect(() => {
         if (!user || user.role !== 'admin') {
@@ -43,6 +52,8 @@ const Admin = () => {
             fetchCustomers();
         } else if (activeTab === 'offers') {
             fetchOffers();
+        } else if (activeTab === 'requirements') {
+            fetchRequirements();
         }
     }, [activeTab]);
 
@@ -89,7 +100,14 @@ const Admin = () => {
         try {
             const res = await api.get('/admin/offers');
             setOffers(res.data);
-        } catch(err) { console.error("Failed to load offers", err); }
+        } catch(err) { console.error("Failed to load offers"); }
+    };
+    
+    const fetchRequirements = async () => {
+        try {
+            const res = await api.get('/admin/requirements');
+            setRequirements(res.data);
+        } catch(err) { console.error("Failed to load requirements"); }
     };
 
     const handleUpload = async (file) => {
@@ -103,11 +121,30 @@ const Admin = () => {
 
     const handleUpdateOrderStatus = async (orderId, newStatus) => {
         try {
-            await api.put(`/admin/orders/${orderId}/status?status=${newStatus}`);
+            await api.put(`/api/admin/orders/${orderId}/status?status=${newStatus}`);
             fetchOrders();
         } catch(err) {
             alert('Failed to update order status');
         }
+    };
+
+    const handleCreateRequirement = async (e) => {
+        e.preventDefault();
+        try {
+            await api.post('/admin/requirements', reqForm);
+            alert('Requirement Saved!');
+            setReqForm({ customer_name: '', product_category: 'Mug', color: '#ffffff', quantity: 1, notes: '', custom_text: '' });
+            fetchRequirements();
+        } catch(err) {
+            alert('Failed to save requirement');
+        }
+    };
+
+    const handleUpdateReqStatus = async (id, status) => {
+        try {
+            await api.put(`/admin/requirements/${id}/status?status=${status}`);
+            fetchRequirements();
+        } catch(err) { alert('Failed to update status'); }
     };
 
     const handleDeleteOffer = async (id) => {
@@ -129,11 +166,12 @@ const Admin = () => {
 
     const getStatusColor = (status) => {
         const colors = {
-            pending: '#f59e0b',
-            processing: '#3b82f6',
-            shipped: '#8b5cf6',
-            delivered: '#10b981',
-            cancelled: '#ef4444'
+            'New': '#f59e0b',
+            'Designing': '#3b82f6',
+            'Printing': '#8b5cf6',
+            'Ready': '#10b981',
+            'Delivered': '#059669',
+            'Cancelled': '#ef4444'
         };
         return colors[status] || '#6b7280';
     };
@@ -240,7 +278,7 @@ const Admin = () => {
                                 <input required type="text" value={name} onChange={e=>setName(e.target.value)} />
                             </div>
                             <div className="form-group">
-                                <label>Base Price ($) <span>*</span></label>
+                                <label>Base Price (₹) <span>*</span></label>
                                 <input required type="number" step="0.01" value={price} onChange={e=>setPrice(e.target.value)} />
                             </div>
                         </div>
@@ -360,6 +398,9 @@ const Admin = () => {
                     <button className={`nav-btn ${activeTab === 'offers' ? 'active' : ''}`} onClick={() => setActiveTab('offers')}>
                         <Tag size={20} /> Offers / Clock
                     </button>
+                    <button className={`nav-btn ${activeTab === 'requirements' ? 'active' : ''}`} onClick={() => setActiveTab('requirements')}>
+                        <ClipboardList size={20} /> Requirements
+                    </button>
                 </nav>
             </aside>
 
@@ -379,7 +420,7 @@ const Admin = () => {
                                     <div className="stat-icon revenue"><BarChart /></div>
                                     <div className="stat-details">
                                         <h3>Total Revenue</h3>
-                                        <p>${stats.total_sales.toFixed(2)}</p>
+                                        <p>₹{stats.total_sales.toFixed(2)}</p>
                                     </div>
                                 </div>
                                 <div className="stat-card">
@@ -401,6 +442,81 @@ const Admin = () => {
                                     <div className="stat-details">
                                         <h3>Products</h3>
                                         <p>{stats.total_products}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="dashboard-charts">
+                                <div className="chart-card revenue-chart">
+                                    <h3>Revenue Overview (Monthly)</h3>
+                                    <div className="bar-chart-container">
+                                        {[
+                                            { month: 'Jan', val: 12000 },
+                                            { month: 'Feb', val: 19000 },
+                                            { month: 'Mar', val: 15000 },
+                                            { month: 'Apr', val: 22000 },
+                                            { month: 'May', val: 28000 },
+                                            { month: 'Jun', val: stats.total_sales || 10000 }
+                                        ].map(m => (
+                                            <div key={m.month} className="bar-wrapper">
+                                                <div className="bar" style={{ height: `${(m.val / 30000) * 100}%` }}>
+                                                    <span className="bar-tooltip">₹{m.val.toLocaleString()}</span>
+                                                </div>
+                                                <span className="month-label">{m.month}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                
+                                <div className="chart-card recent-activity">
+                                    <h3>Recent Orders</h3>
+                                    <div className="mini-table">
+                                        {orders.slice(0, 5).map(o => (
+                                            <div key={o.id} className="mini-row">
+                                                <div className="mini-info">
+                                                    <span className="mini-id">#{o.id}</span>
+                                                    <span className="mini-name">{o.customer_name}</span>
+                                                </div>
+                                                <div className="mini-status-price">
+                                                    <span className={`mini-status ${o.status.toLowerCase()}`}>{o.status}</span>
+                                                    <span className="mini-price">₹{o.total_amount.toFixed(0)}</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {orders.length === 0 && <p className="no-data">No recent orders</p>}
+                                    </div>
+                                    <button className="view-all-link" onClick={() => setActiveTab('orders')}>View All Orders</button>
+                                </div>
+                            </div>
+
+                            <div className="dashboard-bottom-grid">
+                                <div className="chart-card">
+                                    <h3>Pending Requirements</h3>
+                                    <div className="mini-list">
+                                        {requirements.filter(r => r.status !== 'Delivered').slice(0, 4).map(r => (
+                                            <div key={r.id} className="mini-item">
+                                                <div className="mini-item-icon"><ClipboardList size={16} /></div>
+                                                <div className="mini-item-text">
+                                                    <strong>{r.customer_name}</strong>
+                                                    <p>{r.product_category} - {r.quantity} pcs</p>
+                                                </div>
+                                                <span className="mini-badge">{r.status}</span>
+                                            </div>
+                                        ))}
+                                        {requirements.length === 0 && <p className="no-data">No pending requirements</p>}
+                                    </div>
+                                    <button className="view-all-link" onClick={() => setActiveTab('requirements')}>Manage Requirements</button>
+                                </div>
+
+                                <div className="chart-card quick-actions">
+                                    <h3>Quick Actions</h3>
+                                    <div className="actions-grid">
+                                        <button onClick={() => { setRequirementForm({ customer_name: '', product_category: '', quantity: 1, notes: '', color: '', custom_text: '' }); setActiveTab('requirements'); }}>
+                                            + New Requirement
+                                        </button>
+                                        <button onClick={() => setActiveTab('products')}>+ Add Product</button>
+                                        <button onClick={() => setActiveTab('offers')}>Create Offer</button>
+                                        <button onClick={() => window.print()}>Print Report</button>
                                     </div>
                                 </div>
                             </div>
@@ -438,7 +554,7 @@ const Admin = () => {
                                                 <tr className={expandedOrder === order.id ? 'row-expanded' : ''}>
                                                     <td><strong>#{order.id}</strong></td>
                                                     <td>{order.customer_name}</td>
-                                                    <td><strong>${order.total_amount.toFixed(2)}</strong></td>
+                                                    <td><strong>₹{order.total_amount.toFixed(2)}</strong></td>
                                                     <td>
                                                         <span className="status-badge" style={{backgroundColor: getStatusColor(order.status) + '20', color: getStatusColor(order.status)}}>
                                                             {order.status}
@@ -460,11 +576,12 @@ const Admin = () => {
                                                                 value={order.status} 
                                                                 onChange={(e) => handleUpdateOrderStatus(order.id, e.target.value)}
                                                             >
-                                                                <option value="pending">Pending</option>
-                                                                <option value="processing">Processing</option>
-                                                                <option value="shipped">Shipped</option>
-                                                                <option value="delivered">Delivered</option>
-                                                                <option value="cancelled">Cancelled</option>
+                                                                <option value="New">New</option>
+                                                                <option value="Designing">Designing</option>
+                                                                <option value="Printing">Printing</option>
+                                                                <option value="Ready">Ready</option>
+                                                                <option value="Delivered">Delivered</option>
+                                                                <option value="Cancelled">Cancelled</option>
                                                             </select>
                                                         </div>
                                                     </td>
@@ -502,6 +619,16 @@ const Admin = () => {
                         <div className="data-table-container">
                             <div className="table-actions-header">
                                 <h3>Product Catalog</h3>
+                                <div className="catalog-filters">
+                                    <div className="search-box">
+                                        <Search size={16} />
+                                        <input type="text" placeholder="Search products..." value={searchQuery} onChange={e=>setSearchQuery(e.target.value)} />
+                                    </div>
+                                    <select value={catFilter} onChange={e=>setCatFilter(e.target.value)}>
+                                        <option value="">All Categories</option>
+                                        {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                    </select>
+                                </div>
                                 <div className="btn-group">
                                     <button className="primary-btn" onClick={() => setShowAddCategory(true)}>+ Add Category</button>
                                     <button className="primary-btn" onClick={() => setShowAddProduct(true)}>+ Add Product</button>
@@ -519,11 +646,14 @@ const Admin = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {products.map(p => (
+                                    {products.filter(p => 
+                                        p.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
+                                        (!catFilter || p.category_id === parseInt(catFilter))
+                                    ).map(p => (
                                         <tr key={p.id}>
                                             <td>{p.id}</td>
                                             <td><strong>{p.name}</strong></td>
-                                            <td>${p.base_price.toFixed(2)}</td>
+                                            <td>₹{p.base_price.toFixed(2)}</td>
                                             <td>{categories.find(c => c.id === p.category_id)?.name || p.category_id}</td>
                                         </tr>
                                     ))}
@@ -555,7 +685,7 @@ const Admin = () => {
                                             <td><strong>{c.name}</strong></td>
                                             <td>{c.email}</td>
                                             <td>{c.order_count}</td>
-                                            <td>${c.total_spent.toFixed(2)}</td>
+                                            <td>₹{c.total_spent.toFixed(2)}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -604,6 +734,98 @@ const Admin = () => {
                                     ))}
                                 </tbody>
                             </table>
+                        </div>
+                    )}
+
+                    {/* ===== REQUIREMENTS ===== */}
+                    {activeTab === 'requirements' && (
+                        <div className="requirements-tab">
+                            <div className="req-grid">
+                                <div className="req-form-card">
+                                    <h3>New Customer Requirement</h3>
+                                    <form onSubmit={handleCreateRequirement}>
+                                        <div className="form-group">
+                                            <label>Customer Name</label>
+                                            <input required type="text" value={reqForm.customer_name} onChange={e=>setReqForm({...reqForm, customer_name: e.target.value})} />
+                                        </div>
+                                        <div className="form-row">
+                                            <div className="form-group">
+                                                <label>Category</label>
+                                                <select value={reqForm.product_category} onChange={e=>setReqForm({...reqForm, product_category: e.target.value})}>
+                                                    <option>Mug</option>
+                                                    <option>T-Shirt</option>
+                                                    <option>Frame</option>
+                                                    <option>Other</option>
+                                                </select>
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Color</label>
+                                                <input type="color" value={reqForm.color} onChange={e=>setReqForm({...reqForm, color: e.target.value})} />
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Qty</label>
+                                                <input type="number" min="1" value={reqForm.quantity} onChange={e=>setReqForm({...reqForm, quantity: parseInt(e.target.value)})} />
+                                            </div>
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Custom Text (Instant Preview)</label>
+                                            <input type="text" placeholder="Happy Birthday!" value={reqForm.custom_text} onChange={e=>setReqForm({...reqForm, custom_text: e.target.value})} />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Notes / Instructions</label>
+                                            <textarea rows="2" value={reqForm.notes} onChange={e=>setReqForm({...reqForm, notes: e.target.value})}></textarea>
+                                        </div>
+                                        <button type="submit" className="primary-btn full-width">Save Requirement</button>
+                                    </form>
+                                </div>
+                                
+                                <div className="req-preview-card">
+                                    <ProductPreview 
+                                        type={reqForm.product_category}
+                                        color={reqForm.color}
+                                        text={reqForm.custom_text}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="data-table-container" style={{marginTop: '30px'}}>
+                                <h3>Requirement History ({requirements.length})</h3>
+                                <table className="admin-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Customer</th>
+                                            <th>Product</th>
+                                            <th>Text</th>
+                                            <th>Status</th>
+                                            <th>Created</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {requirements.map(r => (
+                                            <tr key={r.id}>
+                                                <td><strong>{r.customer_name}</strong></td>
+                                                <td>{r.product_category} ({r.quantity})</td>
+                                                <td><small>{r.custom_text || '-'}</small></td>
+                                                <td>
+                                                    <select 
+                                                        className="status-select small"
+                                                        value={r.status} 
+                                                        onChange={(e) => handleUpdateReqStatus(r.id, e.target.value)}
+                                                        style={{color: getStatusColor(r.status)}}
+                                                    >
+                                                        <option value="New">New</option>
+                                                        <option value="Designing">Designing</option>
+                                                        <option value="Printing">Printing</option>
+                                                        <option value="Ready">Ready</option>
+                                                        <option value="Delivered">Delivered</option>
+                                                    </select>
+                                                </td>
+                                                <td className="date-cell">{formatDate(r.created_at)}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     )}
 
