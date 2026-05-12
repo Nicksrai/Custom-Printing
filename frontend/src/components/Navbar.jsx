@@ -63,6 +63,9 @@ const Navbar = () => {
                     <li><Link to="/products" className={isActive('/products') ? 'active' : ''}>ALL PRODUCTS</Link></li>
                     <li><Link to="/blog" className={isActive('/blog') ? 'active' : ''}>BLOG</Link></li>
                     <li><Link to="/contact" className={isActive('/contact') ? 'active' : ''}>CONTACT</Link></li>
+                    {user && (
+                        <li><Link to="/my-orders" className={isActive('/my-orders') ? 'active' : ''}>ORDERS</Link></li>
+                    )}
                 </ul>
 
                 {/* Right */}

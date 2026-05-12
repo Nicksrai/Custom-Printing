@@ -1,0 +1,230 @@
+.admin-order-detail-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px;
+    background: #f8fafc;
+    min-height: 100vh;
+}
+
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: #64748b;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.back-btn:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 30px;
+}
+
+.info-card {
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    margin-bottom: 30px;
+}
+
+.info-card h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 16px;
+    color: #1e293b;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 12px;
+}
+
+.status-banner {
+    padding: 12px;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.status-banner[data-status="New"] { background: #fef3c7; color: #d97706; }
+.status-banner[data-status="Designing"] { background: #dbeafe; color: #1e40af; }
+.status-banner[data-status="Delivered"] { background: #d1fae5; color: #059669; }
+
+.meta-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #475569;
+    font-size: 14px;
+}
+
+.meta-item.address {
+    align-items: flex-start;
+}
+
+.items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.item-detail-row {
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 30px;
+}
+
+.item-detail-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.item-header h4 {
+    margin: 0;
+    font-size: 18px;
+    color: #0f172a;
+}
+
+.item-header .qty {
+    color: #64748b;
+    font-weight: 400;
+    margin-left: 10px;
+}
+
+.item-header .price {
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.customization-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+}
+
+.spec-group {
+    margin-bottom: 15px;
+}
+
+.spec-group label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #94a3b8;
+    margin-bottom: 5px;
+    font-weight: 700;
+}
+
+.spec-val {
+    font-size: 14px;
+    color: #334155;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.text-val {
+    font-size: 16px;
+    color: #4f46e5;
+}
+
+.color-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+}
+
+.design-preview-section label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #94a3b8;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.design-frame {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 20px;
+    border: 2px dashed #e2e8f0;
+    text-align: center;
+}
+
+.design-frame img {
+    max-width: 100%;
+    max-height: 250px;
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    margin-bottom: 15px;
+}
+
+.zoom-btn {
+    display: inline-block;
+    padding: 6px 12px;
+    background: #1e293b;
+    color: white;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 6px;
+    transition: 0.2s;
+}
+
+.zoom-btn:hover {
+    background: #000;
+}
+
+@media (max-width: 1024px) {
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+    .customization-summary {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media print {
+    .back-btn, .header-actions { display: none; }
+    .admin-order-detail-container { padding: 0; background: white; }
+    .info-card { box-shadow: none; border: 1px solid #eee; }
+}

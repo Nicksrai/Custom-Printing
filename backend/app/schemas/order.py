@@ -26,6 +26,12 @@ class OrderItemBase(BaseModel):
     price: float
     customization_details: Optional[str] = None
 
+class DirectItemCheckout(BaseModel):
+    product_id: int
+    quantity: int
+    customization_details: Optional[str] = None
+    price: float
+
 class OrderItemResponse(OrderItemBase):
     id: int
     product: ProductResponse
@@ -37,7 +43,7 @@ class OrderBase(BaseModel):
     shipping_address: str
     
 class OrderCreate(OrderBase):
-    pass
+    direct_item: Optional[DirectItemCheckout] = None
 
 class OrderResponse(OrderBase):
     id: int

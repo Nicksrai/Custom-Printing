@@ -67,8 +67,8 @@ const MyOrders = () => {
 
         // Order Info
         doc.setTextColor(0);
-        doc.text(`Invoice Date: ₹{new Date().toLocaleDateString()}`, 140, 35);
-        doc.text(`Order ID: #₹{order.id}`, 140, 40);
+        doc.text(`Invoice Date: ${new Date().toLocaleDateString()}`, 140, 35);
+        doc.text(`Order ID: #${order.id}`, 140, 40);
 
         // Customer Info
         doc.line(20, 45, 190, 45);
@@ -86,8 +86,8 @@ const MyOrders = () => {
             const itemData = [
                 item.product_name,
                 item.quantity,
-                `₹₹{item.price.toFixed(2)}`,
-                `₹₹{(item.price * item.quantity).toFixed(2)}`
+                `₹${item.price.toFixed(2)}`,
+                `₹${(item.price * item.quantity).toFixed(2)}`
             ];
             tableRows.push(itemData);
         });
@@ -97,18 +97,46 @@ const MyOrders = () => {
             body: tableRows,
             startY: 75,
             theme: 'grid',
-            headStyles: { fillStyle: [33, 37, 41] }
+            headStyles: { fillColor: [33, 37, 41] }
         });
 
         const finalY = doc.lastAutoTable.finalY + 10;
         doc.setFontSize(12);
-        doc.text(`Grand Total: ₹₹{order.total_amount.toFixed(2)}`, 140, finalY);
+        doc.text(`Grand Total: ₹${order.total_amount.toFixed(2)}`, 140, finalY);
 
         doc.setFontSize(10);
         doc.setTextColor(150);
         doc.text("Thank you for shopping with PrintHub Studio!", 105, finalY + 20, { align: "center" });
 
-        doc.save(`Invoice_Order_₹{order.id}.pdf`);
+        doc.save(`Invoice_Order_${order.id}.pdf`);
+    };
+
+    const TrackingStepper = ({ status }) => {
+        const steps = ['New', 'Designing', 'Printing', 'Ready', 'Delivered'];
+        const currentStepIndex = steps.indexOf(status);
+        
+        if (status === 'Cancelled') {
+            return (
+                <div className="tracking-cancelled">
+                    <XCircle size={20} color="#ef4444" />
+                    <span>This order has been cancelled</span>
+                </div>
+            );
+        }
+
+        return (
+            <div className="tracking-stepper">
+                {steps.map((step, index) => (
+                    <div key={step} className={`step ${index <= currentStepIndex ? 'active' : ''} ${index === currentStepIndex ? 'current' : ''}`}>
+                        <div className="step-dot">
+                            {index < currentStepIndex ? <CheckCircle size={14} /> : <span>{index + 1}</span>}
+                        </div>
+                        <span className="step-label">{step}</span>
+                        {index < steps.length - 1 && <div className="step-line"></div>}
+                    </div>
+                ))}
+            </div>
+        );
     };
 
     if (loading) return <div className="loading-screen">Loading your orders...</div>;
@@ -152,13 +180,14 @@ const MyOrders = () => {
                                 </div>
 
                                 <div className="order-body">
-                                    <div className="order-status-bar">
-                                        <div className="status-indicator">
-                                            {getStatusIcon(order.status)}
-                                            <span className="status-text">{order.status.toUpperCase()}</span>
-                                        </div>
+                                    <div className="order-tracking-section">
+                                        <h5>Order Progress</h5>
+                                        <TrackingStepper status={order.status} />
+                                    </div>
+
+                                    <div className="order-footer-meta">
                                         <span className="payment-status">
-                                            Payment: <strong className={order.payment_status === 'completed' ? 'paid' : 'unpaid'}>{order.payment_status}</strong>
+                                            Payment Status: <strong className={order.payment_status === 'completed' ? 'paid' : 'unpaid'}>{order.payment_status}</strong>
                                         </span>
                                     </div>
 

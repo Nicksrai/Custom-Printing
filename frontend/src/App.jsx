@@ -13,6 +13,8 @@ import Blog from './pages/Blog';
 import Contact from './pages/Contact';
 import MyOrders from './pages/MyOrders';
 import Wishlist from './pages/Wishlist';
+import Checkout from './pages/Checkout';
+import AdminOrderDetail from './pages/AdminOrderDetail';
 
 function App() {
   return (
@@ -26,10 +28,12 @@ function App() {
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/orders/:id" element={<AdminOrderDetail />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/my-orders" element={<MyOrders />} />
           <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/checkout" element={<Checkout />} />
         </Routes>
         <Footer />
       </Router>

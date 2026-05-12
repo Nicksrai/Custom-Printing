@@ -26,6 +26,7 @@ class CustomerRequirementCreate(BaseModel):
     quantity: int = 1
     notes: Optional[str] = None
     custom_text: Optional[str] = None
+    reference_image_url: Optional[str] = None
 
 # ===== Dashboard =====
 @router.get("/dashboard")
@@ -86,6 +87,38 @@ def update_order_status(order_id: int, status: str, db: Session = Depends(get_db
     order.status = status
     db.commit()
     return {"message": f"Order #{order_id} status updated to {status}"}
+
+@router.get("/orders/{order_id}")
+def get_order_detail(order_id: int, db: Session = Depends(get_db), current_admin = Depends(get_current_admin)):
+    order = db.query(Order).options(
+        joinedload(Order.user),
+        joinedload(Order.items).joinedload(OrderItem.product),
+        joinedload(Order.payment)
+    ).filter(Order.id == order_id).first()
+    
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    return {
+        "id": order.id,
+        "customer_name": order.user.name if order.user else "N/A",
+        "customer_email": order.user.email if order.user else "N/A",
+        "total_amount": order.total_amount,
+        "status": order.status.value if order.status else "pending",
+        "shipping_address": order.shipping_address,
+        "created_at": order.created_at.isoformat() if order.created_at else None,
+        "payment_status": order.payment.status.value if order.payment else "unpaid",
+        "items": [
+            {
+                "id": item.id,
+                "product_name": item.product.name if item.product else "Deleted Product",
+                "quantity": item.quantity,
+                "price": item.price,
+                "customization": item.customization_details
+            }
+            for item in order.items
+        ]
+    }
 
 # ===== Users =====
 @router.get("/users")
@@ -160,7 +193,8 @@ def create_requirement(req: CustomerRequirementCreate, db: Session = Depends(get
         color=req.color,
         quantity=req.quantity,
         notes=req.notes,
-        custom_text=req.custom_text
+        custom_text=req.custom_text,
+        reference_image_url=req.reference_image_url
     )
     db.add(db_req)
     db.commit()

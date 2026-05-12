@@ -3,7 +3,6 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import './ProductDetails.css';
-import ProductPreview from '../components/ProductPreview';
 import { Heart } from 'lucide-react';
 
 const ProductDetails = () => {
@@ -92,19 +91,8 @@ const ProductDetails = () => {
 
     return (
         <div className="product-details-container">
-            <div className="product-grid">
-
-                {/* Visual Preview Area */}
-                <div className="product-visual">
-                    <ProductPreview
-                        type={product.category?.name || product.name}
-                        color={customization.color}
-                        text={customization.text}
-                        image={uploadedFileUrl ? `http://localhost:8000${uploadedFileUrl}` : null}
-                    />
-                </div>
-
-                {/* Customization & Info Panel */}
+            <div className="product-detail-view">
+                {/* Product Info Panel */}
                 <div className="product-info-panel">
                     <h1>{product.name}</h1>
                     <p className="price">₹{(currentPrice * quantity).toFixed(2)}</p>
@@ -128,7 +116,7 @@ const ProductDetails = () => {
                             <div className="form-row">
                                 <div className="form-group">
                                     <label>Base Color</label>
-                                    <input type="color" value={customization.color} onChange={e => setCustomization({ ...customization, color: e.target.value })} />
+                                    <input type="color" className="color-picker" value={customization.color} onChange={e => setCustomization({ ...customization, color: e.target.value })} />
                                 </div>
                                 <div className="form-group">
                                     <label>Print Side</label>
@@ -161,6 +149,24 @@ const ProductDetails = () => {
                         </div>
                         <button className="add-to-cart-btn" onClick={handleAddToCart}>
                             Add to Cart
+                        </button>
+                        <button className="buy-now-btn" onClick={() => {
+                            if (!user) { navigate('/login'); return; }
+                            const directItem = {
+                                product_id: parseInt(id),
+                                product_name: product.name,
+                                quantity: quantity,
+                                price: currentPrice,
+                                customization_details: JSON.stringify({
+                                    text: customization.text,
+                                    color: customization.color,
+                                    side: customization.printSide,
+                                    uploadedDesign: uploadedFileUrl
+                                })
+                            };
+                            navigate('/checkout', { state: { directItem } });
+                        }}>
+                            Buy Now
                         </button>
                         <button className="wishlist-action-btn" onClick={handleWishlist} title="Add to Wishlist">
                             <Heart size={20} />

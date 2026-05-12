@@ -65,37 +65,61 @@ def remove_from_cart(item_id: int, db: Session = Depends(get_db), current_user =
 # Checkout flow
 @router.post("/checkout", response_model=PaymentIntentResponse)
 def checkout(order_data: OrderCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
-    cart_items = db.query(CartItem).filter(CartItem.user_id == current_user.id).all()
-    if not cart_items:
-        raise HTTPException(status_code=400, detail="Cart is empty")
+    if order_data.direct_item:
+        # Direct Checkout (Buy Now)
+        total_amount = order_data.direct_item.price * order_data.direct_item.quantity
         
-    total_amount = sum([item.total_price for item in cart_items])
-    
-    # Create Order
-    db_order = Order(
-        user_id=current_user.id,
-        total_amount=total_amount,
-        shipping_address=order_data.shipping_address
-    )
-    db.add(db_order)
-    db.commit()
-    db.refresh(db_order)
-    
-    # Move Cart Items to Order Items
-    for item in cart_items:
+        db_order = Order(
+            user_id=current_user.id,
+            total_amount=total_amount,
+            shipping_address=order_data.shipping_address
+        )
+        db.add(db_order)
+        db.commit()
+        db.refresh(db_order)
+        
         order_item = OrderItem(
             order_id=db_order.id,
-            product_id=item.product_id,
-            quantity=item.quantity,
-            price=item.total_price / item.quantity,
-            customization_details=item.customization_details
+            product_id=order_data.direct_item.product_id,
+            quantity=order_data.direct_item.quantity,
+            price=order_data.direct_item.price,
+            customization_details=order_data.direct_item.customization_details
         )
         db.add(order_item)
-    
-    # Empty Cart
-    db.query(CartItem).filter(CartItem.user_id == current_user.id).delete()
-    
-    db.commit()
+        db.commit()
+        
+    else:
+        # Cart Checkout
+        cart_items = db.query(CartItem).filter(CartItem.user_id == current_user.id).all()
+        if not cart_items:
+            raise HTTPException(status_code=400, detail="Cart is empty")
+            
+        total_amount = sum([item.total_price for item in cart_items])
+        
+        # Create Order
+        db_order = Order(
+            user_id=current_user.id,
+            total_amount=total_amount,
+            shipping_address=order_data.shipping_address
+        )
+        db.add(db_order)
+        db.commit()
+        db.refresh(db_order)
+        
+        # Move Cart Items to Order Items
+        for item in cart_items:
+            order_item = OrderItem(
+                order_id=db_order.id,
+                product_id=item.product_id,
+                quantity=item.quantity,
+                price=item.total_price / item.quantity,
+                customization_details=item.customization_details
+            )
+            db.add(order_item)
+        
+        # Empty Cart
+        db.query(CartItem).filter(CartItem.user_id == current_user.id).delete()
+        db.commit()
     
     # Simulate Returning Client Secret for dummy payment
     return {

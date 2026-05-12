@@ -164,5 +164,6 @@ class CustomerRequirement(Base):
     quantity = Column(Integer, default=1)
     notes = Column(Text, nullable=True)
     custom_text = Column(String(200), nullable=True)
+    reference_image_url = Column(String, nullable=True)
     status = Column(Enum(OrderStatus), default=OrderStatus.new)
     created_at = Column(DateTime, default=datetime.utcnow)

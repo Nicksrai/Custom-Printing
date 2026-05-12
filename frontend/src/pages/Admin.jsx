@@ -31,7 +31,7 @@ const Admin = () => {
     const [showAddOffer, setShowAddOffer] = useState(false);
     const [expandedOrder, setExpandedOrder] = useState(null);
     const [reqForm, setReqForm] = useState({
-        customer_name: '', product_category: 'Mug', color: '#ffffff', quantity: 1, notes: '', custom_text: ''
+        customer_name: '', product_category: 'Mug', color: '#ffffff', quantity: 1, notes: '', custom_text: '', reference_image_url: ''
     });
     
     useEffect(() => {
@@ -121,7 +121,7 @@ const Admin = () => {
 
     const handleUpdateOrderStatus = async (orderId, newStatus) => {
         try {
-            await api.put(`/api/admin/orders/${orderId}/status?status=${newStatus}`);
+            await api.put(`/admin/orders/${orderId}/status?status=${newStatus}`);
             fetchOrders();
         } catch(err) {
             alert('Failed to update order status');
@@ -133,11 +133,59 @@ const Admin = () => {
         try {
             await api.post('/admin/requirements', reqForm);
             alert('Requirement Saved!');
-            setReqForm({ customer_name: '', product_category: 'Mug', color: '#ffffff', quantity: 1, notes: '', custom_text: '' });
+            setReqForm({ customer_name: '', product_category: 'Mug', color: '#ffffff', quantity: 1, notes: '', custom_text: '', reference_image_url: '' });
             fetchRequirements();
         } catch(err) {
             alert('Failed to save requirement');
         }
+    };
+
+    const handleDownloadReqForm = (req) => {
+        import('jspdf').then((jsPDFModule) => {
+            const jsPDF = jsPDFModule.default || jsPDFModule;
+            const doc = new jsPDF();
+            
+            // Header
+            doc.setFontSize(20);
+            doc.text("CUSTOMER REQUIREMENT FORM", 105, 20, { align: "center" });
+            doc.setFontSize(10);
+            doc.text(`Generated on: ${new Date().toLocaleString()}`, 105, 28, { align: "center" });
+            
+            doc.line(20, 35, 190, 35);
+            
+            // Details
+            doc.setFontSize(12);
+            doc.text(`Customer Name: ${req.customer_name}`, 20, 50);
+            doc.text(`Product Category: ${req.product_category}`, 20, 60);
+            doc.text(`Quantity: ${req.quantity}`, 20, 70);
+            doc.text(`Color Choice: ${req.color}`, 20, 80);
+            
+            doc.text("Custom Text:", 20, 95);
+            doc.setFontSize(14);
+            doc.setTextColor(33, 37, 41);
+            doc.text(req.custom_text || "N/A", 30, 105);
+            
+            doc.setFontSize(12);
+            doc.setTextColor(0);
+            doc.text("Special Instructions / Notes:", 20, 120);
+            doc.setFontSize(10);
+            const splitNotes = doc.splitTextToSize(req.notes || "None provided", 160);
+            doc.text(splitNotes, 20, 130);
+            
+            // Reference Image
+            if (req.reference_image_url) {
+                doc.addPage();
+                doc.setFontSize(16);
+                doc.text("REFERENCE IMAGE", 105, 20, { align: "center" });
+                
+                // Add image if possible (simplified for now, ideally fetch and convert to base64)
+                doc.setFontSize(10);
+                doc.text(`Link: ${req.reference_image_url}`, 20, 35);
+                doc.text("(Please refer to the digital copy for full resolution)", 20, 42);
+            }
+            
+            doc.save(`Requirement_${req.customer_name.replace(/\s+/g, '_')}_${req.id}.pdf`);
+        });
     };
 
     const handleUpdateReqStatus = async (id, status) => {
@@ -568,7 +616,7 @@ const Admin = () => {
                                                     <td className="date-cell">{formatDate(order.created_at)}</td>
                                                     <td>
                                                         <div className="action-buttons">
-                                                            <button className="icon-action-btn" onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}>
+                                                            <button className="icon-action-btn" onClick={() => navigate(`/admin/orders/${order.id}`)}>
                                                                 <Eye size={16} />
                                                             </button>
                                                             <select 
@@ -592,11 +640,37 @@ const Admin = () => {
                                                             <div className="order-detail-panel">
                                                                 <div className="detail-section">
                                                                     <h4>Item Details</h4>
-                                                                    <ul>
-                                                                        {order.items.map((it, i) => (
-                                                                            <li key={i}>{it.product_name} x {it.quantity} - ${it.price.toFixed(2)}</li>
-                                                                        ))}
-                                                                    </ul>
+                                                                    <div className="order-items-grid">
+                                                                        {order.items.map((it, i) => {
+                                                                            const customization = it.customization_details ? JSON.parse(it.customization_details) : null;
+                                                                            return (
+                                                                                <div key={i} className="order-item-detail">
+                                                                                    <div className="item-main-info">
+                                                                                        <strong>{it.product_name}</strong> x {it.quantity} — ₹{it.price.toFixed(2)}
+                                                                                    </div>
+                                                                                    {customization && (
+                                                                                        <div className="customization-data">
+                                                                                            {customization.text && <p><strong>Text:</strong> "{customization.text}"</p>}
+                                                                                            {customization.color && <p><strong>Color:</strong> {customization.color}</p>}
+                                                                                            {customization.side && <p><strong>Side:</strong> {customization.side}</p>}
+                                                                                            {customization.uploadedDesign && (
+                                                                                                <div className="design-download">
+                                                                                                    <a 
+                                                                                                        href={`http://localhost:8000${customization.uploadedDesign}`} 
+                                                                                                        target="_blank" 
+                                                                                                        rel="noopener noreferrer"
+                                                                                                        className="download-link"
+                                                                                                    >
+                                                                                                        Download Custom Design
+                                                                                                    </a>
+                                                                                                </div>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
+                                                                            );
+                                                                        })}
+                                                                    </div>
                                                                 </div>
                                                                 <div className="detail-section">
                                                                     <h4>Shipping To</h4>
@@ -768,24 +842,20 @@ const Admin = () => {
                                             </div>
                                         </div>
                                         <div className="form-group">
-                                            <label>Custom Text (Instant Preview)</label>
-                                            <input type="text" placeholder="Happy Birthday!" value={reqForm.custom_text} onChange={e=>setReqForm({...reqForm, custom_text: e.target.value})} />
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Notes / Instructions</label>
-                                            <textarea rows="2" value={reqForm.notes} onChange={e=>setReqForm({...reqForm, notes: e.target.value})}></textarea>
+                                            <label>Reference Image / Sketch</label>
+                                            <input type="file" accept="image/*" onChange={async (e) => {
+                                                const file = e.target.files[0];
+                                                if (file) {
+                                                    const url = await handleUpload(file);
+                                                    setReqForm({ ...reqForm, reference_image_url: url });
+                                                }
+                                            }} />
                                         </div>
                                         <button type="submit" className="primary-btn full-width">Save Requirement</button>
                                     </form>
                                 </div>
                                 
-                                <div className="req-preview-card">
-                                    <ProductPreview 
-                                        type={reqForm.product_category}
-                                        color={reqForm.color}
-                                        text={reqForm.custom_text}
-                                    />
-                                </div>
+                                {/* Preview section removed as per user request */}
                             </div>
 
                             <div className="data-table-container" style={{marginTop: '30px'}}>
@@ -821,6 +891,11 @@ const Admin = () => {
                                                     </select>
                                                 </td>
                                                 <td className="date-cell">{formatDate(r.created_at)}</td>
+                                                <td>
+                                                    <button className="icon-action-btn" title="Download Form" onClick={() => handleDownloadReqForm(r)}>
+                                                        <ShoppingBag size={16} />
+                                                    </button>
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>
